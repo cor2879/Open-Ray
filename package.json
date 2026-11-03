@@ -1,0 +1,12 @@
+{
+  "name": "open-ray",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local-first Blu-ray and UHD authoring tools",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "start": "node src/cli.ts",
+    "test": "node --test test/*.test.ts"
+  }
+}

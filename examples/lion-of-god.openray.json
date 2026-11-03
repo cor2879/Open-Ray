@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "name": "The Lion of God — UHD Playback Test",
+  "profile": "uhd-experimental",
+  "titles": [
+    {
+      "id": "playback-test",
+      "name": "Short 4K test clip",
+      "source": "../media/playback-test.mov",
+      "chapters": [0]
+    }
+  ]
+}
