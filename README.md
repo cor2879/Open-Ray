@@ -4,7 +4,7 @@ Linux-first Blu-ray/UHD authoring software, developed around an independent film
 
 ## Current status
 
-Foundation only. Open-Ray validates project manifests, inspects media with ffprobe, checks chapter bounds, and reports external tool availability. It does **not** yet encode, author menus, build disc folders or ISOs, or certify Blu-ray/UHD compliance.
+Experimental single-title UHD build pipeline. Open-Ray validates manifests, inspects media, extracts HEVC/AC-3 streams without re-encoding, writes tsMuxer metadata, and invokes an external backend for disc-folder or ISO output. It does **not** encode, author menus, or certify Blu-ray/UHD compliance. Actual backend output and hardware playback remain unverified in the development environment.
 
 ## Run
 
@@ -46,3 +46,19 @@ Record player model/firmware, burner, media type, backend version, source proper
 - https://blu-raydisc.info/authoring-faq.php — commercial verification context.
 
 Project licensing is to be selected by the repository owner. No third-party binaries are bundled.
+
+## Experimental build
+
+Install tsMuxer separately. The prototype adapter follows the original upstream's documented `--blu-ray-v3` interface; start qualification with upstream release 2.7.0. This is a candidate backend, not a qualified or bundled dependency. Set `OPEN_RAY_TSMUXER` to an executable path if it is not called `tsMuxeR` on PATH.
+
+```sh
+npm start -- build project.openray.json output-test iso
+npm start -- build project.openray.json output-folder folder
+OPEN_RAY_INTEGRATION=1 npm test
+```
+
+The output directory must not exist, and its parent must exist. The current input contract is deliberately narrow: one UHD title, 3840×2160 HEVC 10-bit 4:2:0, matching nominal/average frame rates (23.976, 24, 25, 29.97, or 30), and one 48kHz stereo/5.1 AC-3 audio stream. This is an experimental adapter constraint, not a complete UHD specification validator. Other input must be encoded separately. No SDR/HDR transformation is performed. English is currently the fixed audio language in generated metadata.
+
+Successful builds contain `disc.iso` or `disc/`, `disc.meta`, and `build-report.json` (source properties, source SHA-256, ISO SHA-256 where applicable, chapter times, backend executable path, and limitations). Intermediate elementary streams are deleted after success. Failures retain partial files and `build-failure.json`; use a fresh directory to retry. A backend exit code and nonempty ISO are only structural smoke checks, not playback validation. Capture the actual backend version separately in the hardware test record.
+
+The optional integration test generates a one-second synthetic 4K blue image with a tone using FFmpeg/libx265, then invokes the real backend. It is skipped unless explicitly enabled and does not test a physical player. Normal tests require only Node.js. CI runs the normal tests.

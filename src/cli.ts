@@ -1,9 +1,13 @@
+import { build } from './build.ts';
 import { loadProject } from './project.ts';
 import { doctor, inspect } from './media.ts';
 const [command, file, ...extra] = process.argv.slice(2);
 try {
-  if (extra.length) throw new Error('Unexpected arguments');
-  if (command === 'doctor' && !file) {
+  if (command !== 'build' && extra.length) throw new Error('Unexpected arguments');
+  if (command === 'build' && file) {
+    if (extra.length < 1 || extra.length > 2) throw new Error('Usage: build <project.json> <new-output-directory> [iso|folder]');
+    console.log(`Build complete: ${await build(file, extra[0], extra[1] ?? 'iso')}. Hardware playback remains unverified.`);
+  } else if (command === 'doctor' && !file) {
     const results = await doctor();
     console.log(JSON.stringify(results, null, 2));
     if (results.some(t => !t.available)) process.exitCode = 1;
@@ -31,7 +35,7 @@ try {
     console.log('Preflight checks readability and chapter bounds only; disc conformance is not certified.');
     if (failed) process.exitCode = 1;
   } else if (!command || command === '--help') {
-    console.log('Open-Ray\n  doctor\n  validate <project.json>\n  inspect <media-file>\n  preflight <project.json>');
+    console.log('Open-Ray\n  build <project.json> <new-output-directory> [iso|folder]\n  doctor\n  validate <project.json>\n  inspect <media-file>\n  preflight <project.json>');
   } else {
     throw new Error('Unknown command or missing argument. Use --help.');
   }
